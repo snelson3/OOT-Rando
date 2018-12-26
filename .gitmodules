@@ -1,0 +1,3 @@
+[submodule "oot/randoassist"]
+	path = oot/randoassist
+	url = https://github.com/snelson3/randoassist.git

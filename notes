@@ -1,0 +1,55 @@
+zelda toolkit  (Windows only but I may want to mess with this later)
+http://forums.zelda64.net/topic/11397140/1/?x=100
+http://wiki.maco64.com/Tools/Hylian_Toolbox
+
+Petries big topic of hacks
+http://forums.zeldaspeedruns.com/index.php?topic=419.0
+
+https://tcrf.net/The_Legend_of_Zelda:_Ocarina_of_Time/Unused_Actors,_Objects,_%26_Variables#ovl_En_Clear_Tag
+
+0x00B6FBF0
+to
+0x00B71440
+size 
+0x1850
+Is the start of the entrance table in OOT (1156 records)
+http://wiki.spinout182.com/w/Entrance_Table
+
+Start of Kokiri Forest child map 0 0206F000
+
+TODO
+  Randomizer features that will be in my pull request:
+    Triforce transitions
+    maybe the beta pedestal swap
+    enemy randomizer
+      1-1 species swap
+      or 
+      swap each object/actor in each map independently
+         make sure to have logic so enemies can still be killed
+      Arwing makes an appearence somewhere
+
+
+BUGS
+There's definitely a bug because I checked spot04_room_0 and it has En_Kusa but the replacement_log doesn't list it changing
+
+Things to Test
+  I want to mess with replacing the rolling boulder for fun, what happens if it spawns in weird places?
+  This isn't supposed to work for dynamic enemies, so figure if the following works
+    Stalchilds at night - They are spawned with En_Enount1 Actor, so that would need to be hacked
+    Wolfos at start of SFM - works but switch flag needs to be correct
+    Deku guarding way to slingshot room
+    Water enemies in non water? - Don't seem to spawn
+
+Eventually want to mess with bosses, pretty sure that super fucks things up
+
+
+TODO LIST 
+  Do a test playthrough where all enemies are turned into bubbles, to find rooms that don't work right
+  Add the triforce transitions mod to keysanity, and do a pull request for that 
+  Test the things in the notes with the spreadsheet (mostly room clear testing)
+  rewrite the randomizer cells so they share more code (the framework of searching each room)
+  add in ways to exclude certain rooms/enemies from the randomizer
+  add in the way to make switch rooms work.
+  get it working in the TR fork 
+  write up a detailed pull request with what is getting randomized
+  see what happens?
