@@ -70,7 +70,7 @@ class Room():
                         continue
                 actor_addr = roomSetup['actor_list_addr'] + actor.offset*ACTOR_REC_SIZE
                 # lookupActor should be used by getActors
-                newActor = Actor(self.accessor, lookupActorNum(new_fn), actor.offset, new_var)
+                newActor = Actor(self.accessor, self.accessor.reader.lookupActorNum(new_fn), actor.offset, new_var)
                 if old_object_fn:
                     actor.setObject(old_object_fn)
                 if new_object_fn:
