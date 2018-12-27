@@ -51,7 +51,7 @@ class Room():
             zobj = roomSetup['objects'][z]
             if old_fn == zobj.filename:
                 obj_addr = roomSetup['object_list_addr'] + zobj.offset*OBJECT_REC_SIZE
-                newObj = ZObject(self.accessor, lookupObjectNum(new_fn), zobj.offset)
+                newObj = ZObject(self.accessor, self.accessor.reader.lookupObjectNum(new_fn), zobj.offset)
                 self.accessor.setData(obj_addr, [int(newObj.objId[:2],16), int(newObj.objId[2:],16)])
                 roomSetup['objects'][z] = newObj
     def replaceActor(self, old_fn, new_fn, new_var='0000', old_object_fn=None, new_object_fn=None, index=None, setup=0, replaceObject=True, absIndex=None):

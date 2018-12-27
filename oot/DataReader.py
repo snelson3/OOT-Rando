@@ -1,6 +1,8 @@
 from collections import namedtuple
 import os
 
+
+
 class DataReader:
     def __init__(self, fn='data.xlsx', update=False):
         self.fn = fn
@@ -11,28 +13,42 @@ class DataReader:
         req = requests.get('https://drive.google.com/uc?authuser=0&id=1kjLzvYSLfFtsRoVEtSMwpmZEcwCSEJIX&export=download')
         with open(fn, "wb") as f:
             f.write(req.content)
+    def _notImplemented():
+        raise NotImplementedError("Must be implemented in subclass")
     def read(self):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def lookupObjectDescription(self, fn):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def lookupObjectNum(self, fn):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def lookupActorNum(self, fn):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def getRoomAddrByName(self, name):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def getRoomNames(self):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def getObjectNames(self):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def lookupObjectByIndex(self, index):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def lookupObjectFieldByIndex(self, index, fieldname):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def lookupActorByIndex(self, index):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
     def lookupActorFieldByIndex(self, index, fieldname):
-        raise NotImplementedError("Must be implemented in subclass")
+        self._notImplemented()
+    def lookupEnemyIndex(self):
+        self._notImplemented()
+    def lookupEnemyByIndex(self, index):
+        self._notImplemented()
+    def getEnemyActorNames(self):
+        self._notImplemented()
+    def getEnemyObjectNames(self):
+        self._notImplemented()
+
+#TODO Break into own file
+import xlrd
+import pandas as pd
 
 class PandasDataReader(DataReader):
     def __init__(self, fn='data.xlsx', update=False):
@@ -41,8 +57,6 @@ class PandasDataReader(DataReader):
         if self.fn.endswith('.xlsx'):
             return self._readXLSX()
     def _readXLSX(self):
-        import xlrd
-        import pandas as pd
         book = xlrd.open_workbook(self.fn)
         def _sheetToPandas(name):
             sheet = book.sheet_by_name(name)
@@ -64,7 +78,7 @@ class PandasDataReader(DataReader):
             x = x.iloc[0] # There's only two object duplicates
         return x
     def lookupObjectNum(self, fn):
-        x = self.refobjects[self.ref.objects['Filename'] == fn].index[0] # Get the record No
+        x = self.ref.objects[self.ref.objects['Filename'] == fn].index[0] # Get the record No
         if type(x) == pd.core.series.Series:
             x = x.iloc[0] # There's only two object duplicates
         return x
@@ -78,6 +92,14 @@ class PandasDataReader(DataReader):
         return [r for r in df_filenames if "_room_" in r]  # We don't want the scenes
     def getObjectNames(self):
         return self.ref.objects.index
+    def getEnemyIndex(self):
+        return self.ref.enemies.index
+    def getEnemyActorNames(self):
+        return list(self.ref.enemies['Actor FN'].values)
+    def getEnemyObjectNames(self):
+        return list(self.ref.enemies['Object FN'].values)
+    def lookupEnemyByIndex(self, index):
+        return self.ref.enemies.loc[index]
     def lookupObjectByIndex(self, index):
         return self.ref.objects.loc[index]
     def lookupObjectFieldByIndex(self, index, fieldname):

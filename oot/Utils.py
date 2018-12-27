@@ -1,3 +1,4 @@
+import random
 # General helper and debug methods
 toHex = lambda b: hex(b)[2:].zfill(2).upper()
 def make_readable(data):
