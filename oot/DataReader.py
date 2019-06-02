@@ -45,6 +45,8 @@ class DataReader:
         self._notImplemented()
     def getEnemyObjectNames(self):
         self._notImplemented()
+    def isEnemy(self, object_name=False, actor_name=False):
+        self._notImplemented()
 
 #TODO Break into own file
 import xlrd
@@ -108,3 +110,23 @@ class PandasDataReader(DataReader):
         return self.ref.actors.loc[index]
     def lookupActorFieldByIndex(self, index, fieldname):
         return self.ref.actors.loc[index][fieldname]
+    def lookupEnemyByName(self, object_name=False, actor_name=False):
+        # If two or more rows match, it only returns the first
+        if not self.isEnemy(object_name, actor_name):
+            raise Exception("Provided name does not belong to an enemy")
+        if object_name:
+            enemyMatch = self.ref.enemies.set_index("Object FN").loc[object_name]
+        else:
+            enemyMatch = self.ref.enemies.set_index("Actor FN").loc[actor_name]
+        if hasattr(enemyMatch, "pivot_table"): # is a dataframe
+            return enemyMatch.iloc[0]
+        return enemyMatch
+    def lookupEnemyFieldByName(self, fieldname, object_name=False, actor_name=False):
+        return self.lookupEnemyByName(object_name, actor_name)[fieldname]
+    def isEnemy(self, object_name=False, actor_name=False):
+        if (not (object_name or actor_name)) or (object_name and actor_name):
+            raise Exception("Exactly one of 'object_name' or 'actor_name' must be defined")
+        if object_name:
+            return object_name in self.getEnemyObjectNames()
+        return actor_name in self.getEnemyActorNames()
+    
