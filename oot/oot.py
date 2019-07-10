@@ -8,17 +8,19 @@ ENTRANCE_TABLE = 0x00B6FBF0
 ENTRANCE_TABLE_SIZE = 1555*4 # Records * bytes per record
 
 class Oot(Randomizer):
-    def __init__(self, gamedir, logdir='.'):
+    def __init__(self, gamedir, logdir='.', fn="ZOOTDEC.z64"):
         Randomizer.__init__(self, logdir=logdir)
         self.gamedir = gamedir
+        self.fn = fn
         self.readData()
     def readData(self):
         self.data = self.getData()
     def getData(self):
-        fn = os.path.join(self.gamedir, 'ZOOTDEC.z64')
+        fn = os.path.join(self.gamedir, self.fn)
         if not os.path.isfile(fn):
-            raise Exception("Expanded rom ZOOTDEC.z64 not found")
+            raise Exception("Expanded rom {} not found".format(fn))
         with open(fn, "rb") as f:
+            print("reading {}".format(fn))
             return bytearray(f.read())
     def process(self):
         if not self.args:

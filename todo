@@ -4,8 +4,9 @@ I only saw one buble in the basement of the well
 bats in the well aren't randomized (the ones that spawn from the graveyard)
 adult kokiri and adult sfm are not randomizedpoes in graveyard aren't randomized
 
+baby dodongos won't spawn where hanging skullutas are
 
+Find out if any rooms in vanilla oot where the same actor is there twice with different variables
+   If so, and if one of the variables is not one that's randomized, I believe the one not getting randomized won't spawn
 
-
-
-
+move names of columns/tables into global constants to make easy to change

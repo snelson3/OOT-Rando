@@ -1,4 +1,5 @@
 from .DataReader import PandasDataReader
+from .EnemyMapper import EnemyMapper
 from .Room import Room
 from .Header import Header
 from collections import namedtuple
@@ -10,6 +11,7 @@ class Accessor:
         self.cache_enabled = True
         Cache = namedtuple('Cache', 'actor_object_cache')
         self.cache = Cache(actor_object_cache={})
+        self.enemyMapper = EnemyMapper(self.reader)
     def readData(self):
         self.game.readData()
     def getData(self, start, end=None, to_end=False, size=None):

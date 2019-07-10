@@ -47,6 +47,8 @@ class DataReader:
         self._notImplemented()
     def isEnemy(self, object_name=False, actor_name=False):
         self._notImplemented()
+    def lookupEnemies(self, key, value):
+        self._notImplemented()
 
 #TODO Break into own file
 import xlrd
@@ -73,6 +75,18 @@ class PandasDataReader(DataReader):
                 objects=_sheetToPandas('objects').set_index('Record No'),
                 enemies=_sheetToPandas('enemies').set_index('Enemy')
                 )
+    def _lookupRef(self, ref, key, filterValue=None):
+        f = ref.set_index(key)
+        if filterValue:
+            f = f.loc[filterValue]
+        if len(f) == 0:
+            return []
+        if hasattr(f, "pivot_table"): # more than one result is a dataframe
+            return f.reset_index().to_dict(orient="records")
+        name = f.name
+        f = f.to_dict()
+        f[key] = name
+        return [f]
     def lookupObjectDescription(self, fn):
         x = self.ref.objects[self.ref.objects['Filename'] == fn]['Description'][0]
         # I think this is necessary
@@ -115,12 +129,12 @@ class PandasDataReader(DataReader):
         if not self.isEnemy(object_name, actor_name):
             raise Exception("Provided name does not belong to an enemy")
         if object_name:
-            enemyMatch = self.ref.enemies.set_index("Object FN").loc[object_name]
+            enemies = self.lookupEnemies("Object FN", object_name)
         else:
-            enemyMatch = self.ref.enemies.set_index("Actor FN").loc[actor_name]
-        if hasattr(enemyMatch, "pivot_table"): # is a dataframe
-            return enemyMatch.iloc[0]
-        return enemyMatch
+            enemies = self.lookupEnemies("Actor FN", actor_name)
+        if len(enemies) == 0:
+            raise Exception("Can't find enemy")
+        return enemies[0]
     def lookupEnemyFieldByName(self, fieldname, object_name=False, actor_name=False):
         return self.lookupEnemyByName(object_name, actor_name)[fieldname]
     def isEnemy(self, object_name=False, actor_name=False):
@@ -129,4 +143,5 @@ class PandasDataReader(DataReader):
         if object_name:
             return object_name in self.getEnemyObjectNames()
         return actor_name in self.getEnemyActorNames()
-    
+    def lookupEnemies(self, key="Enemy", value=None):
+        return self._lookupRef(self.ref.enemies.reset_index(), key, value)
