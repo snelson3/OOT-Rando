@@ -94,7 +94,10 @@ class Accessor:
         links_house_ent = ent_table+(4*0xBB) # Record No of the entrance to 
         self.setData(links_house_ent, [scene, entrance])
     def lookupEnemy(self, actor):
+        # Return a list of all enemies that match the actors filename
+        matches = []
         for enemy in self.enemies:
-            if actor.filename == enemy["actor_fn"] and actor.var in [v.var for v in enemy["variables"] + enemy["from_variables"]]:
-                return enemy
-        raise Exception("Enemy not found")
+            if actor.filename == enemy["actor_fn"]:
+                matches.append(enemy)
+        # Returning [] in the null case might generate a lot of false negatives preventing randomizations that would work
+        return matches

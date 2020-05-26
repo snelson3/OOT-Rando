@@ -1,46 +1,71 @@
-import random
+import random, os
 class LogicManager:
     def __init__(self, accessor):
         self.accessor = accessor
-    def makeAssumption(self, check, msg):
+        self.logdir = "logs"
+    def _getSet(self, l):
+        return set([str(i) for i in l])
+    def writeEnemySpoilers(self, spoilers, fn):
+        fn = os.path.join(self.logdir, fn)
+        with open(fn, "w") as f:
+            for name, setup in spoilers.items():
+                if len(setup['objects']) > 0 or len(setup['actors']) > 0:
+                    f.write('{}\n'.format(name))
+                if len(setup['objects']) > 0:
+                    f.write(' objects\n')
+                for o in setup['objects']:
+                    f.write('  {} -> {}\n'.format(o['old'], o['new']))
+                if len(setup['actors']) > 0:
+                    f.write(' actors\n')
+                for a in setup['actors']:
+                    f.write('  {} [{}] -> {} [{}]\n'.format(a['old'], a['old_var'], a['new'], a['new_var']))
+    def makeAssumption(self, check, err):
         if not check:
             if self.accessor.forceAssumptions:
-                raise Exception("ERROR: {}".format(msg))
+                raise Exception("ERROR: {}".format(err))
             print("WARNING: {}")
     def canRandomizeObject(self, obj, actors):
-        # The issue is the lookupEnemy function call
-        #  it's checking for the existence of an actor with proper vars but I don't think it should be doing that
-        #  as it invalidates the canRandomize* methods
-        #  but some enemies can be different based on vars
-        # maybe the key is having lookupEnemy return all the enemies that can match
         if not self.accessor.reader.isEnemy(object_name=obj.filename):
             return False
+        def _lookupEnemy(en):
+            options = self.accessor.lookupEnemy(en)
+            if len(options) == 0:
+                return None
+            for option in options:
+                if en.var in [v.var for v in option["variables"] + option["from_variables"]]:
+                    return option
+            return None # Enemy didn't have matching var
         # Find all matching actors
-        poss = [a for a in actors if a.object_name == obj.filename]
+        poss = [_lookupEnemy(a) for a in actors if a.object_name == obj.filename]
         # Find requirements of all actors
         if len(poss) == 0:
             return False # the actor is not explicitly defined, probably dynamically generated
-        numReqs = len(set([self.accessor.lookupEnemy(p)["type"] for p in poss]))
-        self.makeAssumption(numReqs == 1, "Object in a room has actors with multiple requirements")
-        def _hasGoodVars(a):
-            enemy = self.accessor.lookupEnemy(a)
-            return a.var in [v.var for v in enemy["variables"] + enemy["from_variables"]]
-        # filter to actors with variables in the enemies randomize list
-        good = [p for p in poss if _hasGoodVars(p)]
-        if len(good) == 0:
+        if None in poss:
+            # Possible some actors could be randomized while others can't but just deferring to False for now
             return False
-        self.makeAssumption(len(good)==len(poss), "Some actors in room can be randomized, others can't")
+        numReqs = len(self._getSet([p["type"] for p in poss]))
+        if numReqs > 1:
+            return False # At least 1 room in spirit has invisible floormaster + a visible wallmaster
         return True
     def getNewObject(self, obj, actors):
         # Find all matching actors
         def _getObjsOfType(t):
             return [e for e in self.accessor.enemies if e["type"] == t]
+        def _lookupEnemy(en):
+            options = self.accessor.lookupEnemy(en)
+            for option in options:
+                if en.var in [v.var for v in option["variables"] + option["from_variables"]]:
+                    return option
+            raise Exception("Enemy that is allowed to be randomized has no matching variable")
         poss = [a for a in actors if a.object_name == obj.filename]
-        tpe = self.accessor.lookupEnemy(poss[0])["type"]
+        tpe = _lookupEnemy(poss[0])["type"]
         choice = random.choice(_getObjsOfType(tpe)) if not self.accessor.selected_enemy else self.accessor.selected_enemy
         return choice["object_fn"]
-    def canRandomizeActor(self, actor):
+    def canRandomizeActor(self, actor, randomizable_objects):
         if not self.accessor.reader.isEnemy(actor_name=actor.filename):
+            return False
+        # Checking this is kind of a hack and is excessive, but larger refactor later will eliminate this
+        if not actor.object_name in [o.filename for o in randomizable_objects]:
             return False
         poss_enemies = [e for e in self.accessor.enemies if e["actor_fn"] == actor.filename]
         for enemy in poss_enemies:
@@ -48,9 +73,16 @@ class LogicManager:
                 return True
         return False
     def getNewActor(self, actor, objects):
-        curr_enemy = self.accessor.lookupEnemy(actor)
+        def _lookupEnemy(en):
+            options = self.accessor.lookupEnemy(en)
+            for option in options:
+                if en.var in [v.var for v in option["variables"] + option["from_variables"]]:
+                    return option
+            raise Exception("Enemy that is allowed to be randomized has no matching variable")
+        curr_enemy = _lookupEnemy(actor)
         tpe = curr_enemy["type"]
-        possible_enemies = [e for e in self.accessor.enemies if e["type"] == tpe and e["object_fn"] in [o.filename for o in objects]]
+        # Paring down all the available enemies to the ones with an objectfn in objects and whose type match
+        possible_enemies = [e for e in self.accessor.enemies if e["type"] == tpe and e["object_fn"] in objects]
         new_enemy = random.choice(possible_enemies) if not self.accessor.selected_enemy else self.accessor.selected_enemy["actor_fn"]
         # TODO Selected enemy is broken here, because the selected var is not an namedtuple (and new enemy is bad)
         var = random.choice(new_enemy["variables"]) if not self.accessor.selected_enemy else self.accessor.selected_enemy["var"]

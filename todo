@@ -14,3 +14,8 @@ move names of columns/tables into global constants to make easy to change
 exclude rooms option, switch vars option, make sure fromvars works
 refactor so it makes sense
 need some functions for debug cheats (give items/adult or kid link etc)
+
+for a future refactor (lol), I think the right proper way to do it is thins
+a dictionary of the available enemies for randomization
+when you setup the rooms, go through and mark each actor as a randomizable enemy or not (and mark the type), then you can loop through those a lot more simply with less complicated checks
+   also good for doing advanced memory management/such things
