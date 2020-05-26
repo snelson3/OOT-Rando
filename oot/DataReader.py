@@ -1,6 +1,6 @@
 from collections import namedtuple
 import os
-
+from .Utils import *
 
 
 class DataReader:
@@ -49,8 +49,9 @@ class DataReader:
         self._notImplemented()
     def lookupEnemies(self, key, value):
         self._notImplemented()
+    def listEnemies(self):
+        self._notImplemented()
 
-#TODO Break into own file
 import xlrd
 import pandas as pd
 
@@ -145,3 +146,17 @@ class PandasDataReader(DataReader):
         return actor_name in self.getEnemyActorNames()
     def lookupEnemies(self, key="Enemy", value=None):
         return self._lookupRef(self.ref.enemies.reset_index(), key, value)
+    def listEnemies(self):
+        enemies = []
+        for enemy in self.getEnemyIndex()[1:]:
+            enemy_info = self.lookupEnemyByIndex(enemy)
+            if enemy_info['Enabled']:
+                enemies.append({
+                    "actor_fn": enemy_info["Actor FN"],
+                    "object_fn": enemy_info["Object FN"],
+                    "variables": parseVariableList(enemy_info["Variables"]),
+                    "from_variables": parseVariableList(enemy_info["From-Vars"]),
+                    "type": enemy_info["Requirements"],
+                    "name": enemy
+                })
+        return enemies

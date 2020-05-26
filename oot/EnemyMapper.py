@@ -34,3 +34,5 @@ class EnemyMapper():
         enemy = self.getEnemy(requirements=requirements, actor_name=actor)
         # Might need a selectedVar thing, but going to try not storing it
         return enemy
+        
+        

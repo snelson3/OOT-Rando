@@ -1,4 +1,5 @@
 import random
+from collections import namedtuple
 # General helper and debug methods
 toHex = lambda b: hex(b)[2:].zfill(2).upper()
 def make_readable(data):
@@ -28,4 +29,17 @@ def writeSpoilers(spoilers, fn="spoiler.log"):
             s +='{}({})[{}] -> {}({})[{}]\n'.format(old["filename"],old["description"],old["variable"],new["filename"],new["description"],new["variable"])
     with open(fn, "w") as f:
         f.write(s)
-
+def parseVariableList(l):
+    if len(l) == 0:
+        return []
+    Variable = namedtuple('Variable', 'var desc')
+    vlist = []
+    for v in l.split(','):
+        desc = ''
+        var = v
+        if '(' in var and ')' in var:
+            desc = var.split('(')[1].split(')')[0].strip()
+            var = var.split('(')[0].strip()
+        vlist.append(Variable(var=var, desc=desc))
+    return vlist
+def getRoomName(r,n)

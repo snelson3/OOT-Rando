@@ -8,7 +8,7 @@ ENTRANCE_TABLE = 0x00B6FBF0
 ENTRANCE_TABLE_SIZE = 1555*4 # Records * bytes per record
 
 class Oot(Randomizer):
-    def __init__(self, gamedir, logdir='.', fn="ZOOTDEC.z64"):
+    def __init__(self, gamedir="roms", logdir='logs', fn="ZOOTDEC.z64"):
         Randomizer.__init__(self, logdir=logdir)
         self.gamedir = gamedir
         self.fn = fn

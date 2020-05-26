@@ -2,16 +2,22 @@ from .DataReader import PandasDataReader
 from .EnemyMapper import EnemyMapper
 from .Room import Room
 from .Header import Header
+from .Utils import *
+from .LogicManager import LogicManager
 from collections import namedtuple
 
 class Accessor:
-    def __init__(self, game):
+    def __init__(self, game, force_assumptions=True, selected_enemy=None):
+        self.forceAssumptions=force_assumptions
+        self.selected_enemy=None
         self.game = game
         self.reader = PandasDataReader()
         self.cache_enabled = True
         Cache = namedtuple('Cache', 'actor_object_cache')
         self.cache = Cache(actor_object_cache={})
         self.enemyMapper = EnemyMapper(self.reader)
+        self.manager = LogicManager(self)
+        self.enemies = self.reader.listEnemies()
     def readData(self):
         self.game.readData()
     def getData(self, start, end=None, to_end=False, size=None):
@@ -68,8 +74,27 @@ class Accessor:
             print(room)
             for actor in actors:
                 print(actor.getInfo())
+    def _writeEnemySpoilers(spoilers, fn):
+        fn = os.path.join(LOGDIR, fn)
+        with open(fn, "w") as f:
+            for name, setup in spoilers.items():
+                if len(setup['objects']) > 0 or len(setup['actors']) > 0:
+                    f.write('{}\n'.format(name))
+                if len(setup['objects']) > 0:
+                    f.write(' objects\n')
+                for o in setup['objects']:
+                    f.write('  {} -> {}\n'.format(o['old'], o['new']))
+                if len(setup['actors']) > 0:
+                    f.write(' actors\n')
+                for a in setup['actors']:
+                    f.write('  {} [{}] -> {} [{}] ({})\n'.format(a['old'], a['old_var'], a['new'], a['new_var'], a['descr']))      
     def spawnAt(self, scene, entrance=0x0):
         # Changes the spawn location for kid link (out of dungeons) to the specified record no (as a string)
         ent_table = 0x00B6FBF0 # Start of entrance table
         links_house_ent = ent_table+(4*0xBB) # Record No of the entrance to 
         self.setData(links_house_ent, [scene, entrance])
+    def lookupEnemy(self, actor):
+        for enemy in self.enemies:
+            if actor.filename == enemy["actor_fn"] and actor.var in enemy["variables"] + enemy["from_variables"]:
+                return enemy
+        raise Exception("Enemy not found")

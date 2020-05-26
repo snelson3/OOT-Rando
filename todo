@@ -10,3 +10,7 @@ Find out if any rooms in vanilla oot where the same actor is there twice with di
    If so, and if one of the variables is not one that's randomized, I believe the one not getting randomized won't spawn
 
 move names of columns/tables into global constants to make easy to change
+
+exclude rooms option, switch vars option, make sure fromvars works
+refactor so it makes sense
+need some functions for debug cheats (give items/adult or kid link etc)
