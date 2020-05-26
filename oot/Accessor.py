@@ -95,6 +95,6 @@ class Accessor:
         self.setData(links_house_ent, [scene, entrance])
     def lookupEnemy(self, actor):
         for enemy in self.enemies:
-            if actor.filename == enemy["actor_fn"] and actor.var in enemy["variables"] + enemy["from_variables"]:
+            if actor.filename == enemy["actor_fn"] and actor.var in [v.var for v in enemy["variables"] + enemy["from_variables"]]:
                 return enemy
         raise Exception("Enemy not found")

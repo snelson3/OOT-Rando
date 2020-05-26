@@ -148,7 +148,7 @@ class PandasDataReader(DataReader):
         return self._lookupRef(self.ref.enemies.reset_index(), key, value)
     def listEnemies(self):
         enemies = []
-        for enemy in self.getEnemyIndex()[1:]:
+        for enemy in self.getEnemyIndex():
             enemy_info = self.lookupEnemyByIndex(enemy)
             if enemy_info['Enabled']:
                 enemies.append({

@@ -7,6 +7,7 @@ from oot.Utils import *
 FORCE_ASSUMPTIONS = True
 SEED = 'Deadpool2'
 ROM = "ZOOTDEC.z64"
+#TODO SELECTEDENEMY WON"T WORK DUE TO ISSUE IN logicmanager.getNewActor
 SELECTED_ENEMY = None #{'fn': 'En_Dodojr', 'object_fn': 'object_dodojr', 'var': ('0000', '')}
 game = Oot(fn=ROM)
 accessor = Accessor(game, force_assumptions=FORCE_ASSUMPTIONS, selected_enemy=SELECTED_ENEMY)
@@ -42,16 +43,15 @@ for r, room in rooms.items():
         spoilers[_getRoomName(r,n)] = setup_spoiler
         possible_objects = [o for o in setup['objects'] if accessor.manager.canRandomizeObject(o, setup['actors'])]
         for obj in possible_objects:
-            newobj = accessor.manager.getNewObject(obj, setup['actors'])
+            new_obj = accessor.manager.getNewObject(obj, setup['actors'])
             room.replaceObject(obj.filename, new_obj, n)
-            possible_objects.append(new_obj)
             setup_spoiler['objects'].append({'old': obj.filename, 'new': new_obj})
         for actor in setup['actors']:
             # Some rooms have multiples of the same actor, so come up with an index of them
             # TODO this should be an attribute in the Actor class that is filled in on init
             index = [i for i in setup['actors'] if i.filename == actor.filename].index(actor)
-            if self.accessor.manager.canRandomizeActor(actor):
-                new_actor, new_var = self.accessor.manager.getNewActor(actor, possible_objects)
+            if accessor.manager.canRandomizeActor(actor):
+                new_actor, new_var = accessor.manager.getNewActor(actor, possible_objects)
                 setup_spoiler['actors'].append({'old': actor.filename, 'new': new_actor, 'old_var': actor.var, 'new_var': "({}, {})".format(new_var.var,new_var.desc)})
                 room.replaceActor(actor.filename, new_actor, new_var=new_var.var, index=index, setup=n, replaceObject=False)
 print("Rooms Randomized, {} sec".format(time.time()-start_time))

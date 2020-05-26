@@ -38,8 +38,7 @@ def parseVariableList(l):
         desc = ''
         var = v
         if '(' in var and ')' in var:
-            desc = var.split('(')[1].split(')')[0].strip()
-            var = var.split('(')[0].strip()
-        vlist.append(Variable(var=var, desc=desc))
+            desc = var.split('(')[1].split(')')[0]
+            var = var.split('(')[0]
+        vlist.append(Variable(var=var.strip(), desc=desc.strip()))
     return vlist
-def getRoomName(r,n)
